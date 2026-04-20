@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hospital System</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #eef5ff;
+            text-align: center;
+        }
+
+        .box {
+            background: white;
+            padding: 20px;
+            margin: 20px auto;
+            width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px gray;
+        }
+
+        input, select, button {
+            width: 90%;
+            padding: 8px;
+            margin: 5px;
+        }
+
+        button {
+            background: #2c7be5;
+            color: white;
+            border: none;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🏥 Hospital Appoinment</h1>
+
+<!-- LOGIN -->
+<div class="box" id="loginBox">
+    <h3>Login</h3>
+    <input type="text" id="loginUser" placeholder="Username">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p>New user? <a href="#" onclick="showSignup()">Signup</a></p>
+</div>
+
+<!-- SIGNUP -->
+<div class="box hidden" id="signupBox">
+    <h3>Signup</h3>
+    <input type="text" id="signupUser" placeholder="Username">
+    <input type="password" id="signupPass" placeholder="Password">
+    <button onclick="signup()">Signup</button>
+    <p><a href="#" onclick="showLogin()">Back to Login</a></p>
+</div>
+
+<!-- PATIENT PANEL -->
+<div class="box hidden" id="patientPanel">
+    <h3>Book Appointment</h3>
+    <input type="text" id="name" placeholder="Name">
+    <input type="number" id="age" placeholder="Age">
+
+    <select id="doctor">
+        <option>Dr. Smith</option>
+        <option>Dr. John</option>
+        <option>Dr. Emily</option>
+    </select>
+
+    <input type="date" id="date">
+    <input type="time" id="time">
+
+    <button onclick="book()">Book</button>
+    <button onclick="logout()">Logout</button>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="box hidden" id="adminPanel">
+    <h3>Doctor Dashboard</h3>
+    <div id="appointments"></div>
+    <button onclick="logout()">Logout</button>
+</div>
+
+<script>
+let currentUser = "";
+
+// SHOW/HIDE
+function showSignup() {
+    loginBox.classList.add("hidden");
+    signupBox.classList.remove("hidden");
+}
+
+function showLogin() {
+    signupBox.classList.add("hidden");
+    loginBox.classList.remove("hidden");
+}
+
+// SIGNUP
+function signup() {
+    let user = signupUser.value;
+    let pass = signupPass.value;
+
+    if(user && pass) {
+        localStorage.setItem(user, pass);
+        alert("Signup successful!");
+        showLogin();
+    }
+}
+
+// LOGIN
+function login() {
+    let user = loginUser.value;
+    let pass = loginPass.value;
+
+    // Admin login
+    if(user === "doctor" && pass === "1234") {
+        showAdmin();
+        return;
+    }
+
+    let storedPass = localStorage.getItem(user);
+
+    if(storedPass === pass) {
+        currentUser = user;
+        showPatient();
+    } else {
+        alert("Invalid login");
+    }
+}
+
+// PANELS
+function showPatient() {
+    loginBox.classList.add("hidden");
+    patientPanel.classList.remove("hidden");
+}
+
+function showAdmin() {
+    loginBox.classList.add("hidden");
+    adminPanel.classList.remove("hidden");
+    loadAppointments();
+}
+
+// BOOK APPOINTMENT
+function book() {
+    let data = {
+        user: currentUser,
+        name: name.value,
+        age: age.value,
+        doctor: doctor.value,
+        date: date.value,
+        time: time.value
+    };
+
+    let list = JSON.parse(localStorage.getItem("appointments") || "[]");
+    list.push(data);
+    localStorage.setItem("appointments", JSON.stringify(list));
+
+    alert("Appointment booked!");
+}
+
+// LOAD FOR ADMIN
+function loadAppointments() {
+    let list = JSON.parse(localStorage.getItem("appointments") || "[]");
+
+    let output = "<h4>Appointments:</h4>";
+    list.forEach(a => {
+        output += `<p>${a.name} (${a.age}) - ${a.doctor} on ${a.date} at ${a.time}</p>`;
+    });
+
+    document.getElementById("appointments").innerHTML = output;
+}
+
+// LOGOUT
+function logout() {
+    location.reload();
+}
+</script>
+
+</body>
+</html>
